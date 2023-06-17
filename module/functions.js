@@ -106,79 +106,74 @@ export function renderDetails(object, card){
 
 //stats
 
-// Funcion para filtrar la capacidad
-export function filteredCapacity(events){
-  return events.sort( (a,b) => a.capacity - b.capacity)
+// Función para filtrar la capacidad
+export function filteredCapacity(events) {
+  return events.sort((a, b) => a.capacity - b.capacity);
 }
 
-// Funcion para filtrar la asistencia
-export function filteredAssistance(events) {
-  let eventsAssistance = events.filter(event => event.assistance)
-  let eventsAssistanceSort = [...eventsAssistance].sort((a, b) => a.assistance - b.assistance)
-  return eventsAssistanceSort
+// Función para filtrar la asistencia y el porcentaje de asistencia
+export function filteredAssistanceAndPercentage(events) {
+  return events
+    .filter(event => event.assistance)
+    .map(event => ({
+      event: event.name,
+      percentage: (event.assistance * 100 / event.capacity).toFixed(2)
+    }))
+    .sort((a, b) => a.percentage - b.percentage);
 }
 
-
-// Funcion para filtrar el porcentaje de la asistencia
-export function filteredPercentageAssistance(events){
-  let result = []
-  events.map( event => {
-       let arrayEvents = {
-            event: event.name,
-            percentage: ( event.assistance * 100 / event.capacity ).toFixed(2)
-       }
-  result.push(arrayEvents)
-  }) 
-  return result.sort( (a,b) => a.percentage - b.percentage)
-}
-
-// Funcion para filtrar las ganancias
-export function filteredRevenues (arrayA, arrayB){
-  let eventsRevenues = []
-  for( let categories of arrayA){
-       let categ = arrayB.filter( event => event.category === categories)
-       let revenues = categ.reduce( (acumulador, event) => acumulador + (event.assistance? event.assistance * event.price : event.estimate * event.price), 0)
-       let percentages = (categ.reduce( (acumulador, event) => acumulador + ( (event.assistance? event.assistance * 100 / event.capacity : event.estimate * 100 / event.capacity) ), 0) / categ.length).toFixed(2)
-       eventsRevenues.push( {
-            category: `${categories}`,
-            revenue: revenues,
-            percentage: percentages
-       })
-  }
-  return eventsRevenues
-}
-
-// Funcion para crear la primer tabla
-export function renderTable1(arrayA, arrayB) {
-  let HighPercent = arrayA.pop()
-  let LowPercent = arrayA.shift()
-  let HighCapacity = arrayB.pop()
-  table1.innerHTML = `
-  <th colspan="3">Event statistics</th>
-  <tr> 
-       <td>Events with the highest Percentage of attendance</td>
-       <td>Events with the lowest Percentage of attendance</td>
-       <td>Event with larger capacity</td>
-  </tr>
-  <tr>
-       <td>${HighPercent.event} ${HighPercent.percentage}%</td>
-       <td>${LowPercent.event} ${LowPercent.percentage}%</td>
-       <td>${HighCapacity.name} ${(HighCapacity.capacity).toLocaleString()}</td>
-  </tr>
-  `
-}
-
-
-// Funcion para crear las otras tablas
-export function renderTables2(array,element){
-  array.forEach(event => {
-       element.innerHTML += `
-       <tr>
-            <td>${event.category}</td>
-            <td>$ ${(event.revenue).toLocaleString()}</td>
-            <td>${event.percentage}%</td>
-       </tr>
-       `
+// Función para filtrar las ganancias
+export function filteredRevenues(arrayA, arrayB) {
+  return arrayA.map(category => {
+    const categ = arrayB.filter(event => event.category === category);
+    const revenues = categ.reduce((accumulator, event) => {
+      const attendance = event.assistance || event.estimate;
+      return accumulator + (attendance * event.price);
+    }, 0);
+    const percentages = (
+      categ.reduce((accumulator, event) => {
+        const attendance = event.assistance || event.estimate;
+        return accumulator + (attendance * 100 / event.capacity);
+      }, 0) / categ.length
+    ).toFixed(2);
+    return {
+      category: category,
+      revenue: revenues,
+      percentage: percentages
+    };
   });
 }
-    
+
+// Función para crear la primera tabla
+export function renderTable1(arrayA, arrayB, table) {
+  const highPercent = arrayA[arrayA.length - 1];
+  const lowPercent = arrayA[0];
+  const highCapacity = arrayB[arrayB.length - 1];
+  
+  table.innerHTML = `
+    <th colspan="3">Event statistics</th>
+    <tr> 
+      <td>Events with the highest Percentage of attendance</td>
+      <td>Events with the lowest Percentage of attendance</td>
+      <td>Event with larger capacity</td>
+    </tr>
+    <tr>
+      <td>${highPercent.event} ${highPercent.percentage}%</td>
+      <td>${lowPercent.event} ${lowPercent.percentage}%</td>
+      <td>${highCapacity.name} ${highCapacity.capacity.toLocaleString()}</td>
+    </tr>
+  `;
+}
+
+// Función para crear las otras tablas
+export function renderTables2(array, element) {
+  const rows = array.map(event => `
+    <tr>
+      <td>${event.category}</td>
+      <td>$ ${event.revenue.toLocaleString()}</td>
+      <td>${event.percentage}%</td>
+    </tr>
+  `);
+  
+  element.innerHTML = rows.join('');
+}
