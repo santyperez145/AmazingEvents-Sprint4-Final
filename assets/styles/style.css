@@ -109,6 +109,10 @@ h1, h2 {
     justify-content: space-between;
 }
 
+.contact-main{
+    min-height: 100vh;
+}
+
 .box-contact {
     background-color: black;
     display: flex;
@@ -116,11 +120,12 @@ h1, h2 {
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    height: 67.8vh;
+    height: 130vh;
 }
 
 .contact-form {
     width: auto;
+    height: auto;
 }
 
 textarea {

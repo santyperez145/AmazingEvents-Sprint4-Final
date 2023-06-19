@@ -41,3 +41,5 @@ fetch("https://mindhub-xj03.onrender.com/api/amazing")
     });
   })
   .catch((error) => console.error(error));
+
+  
